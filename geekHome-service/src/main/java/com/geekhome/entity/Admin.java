@@ -1,14 +1,21 @@
 package com.geekhome.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.geekhome.common.utils.CustomDateSerializer;
@@ -19,6 +26,17 @@ import com.geekhome.common.utils.CustomDateSerializer;
  * @date 2017年9月14日 下午5:02:45
  * @version V1.0
  */
+@SqlResultSetMappings({
+
+		@SqlResultSetMapping(name = "getAdminList", classes = @ConstructorResult(targetClass = Admin.class, columns = {
+				@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "userName", type = String.class),
+				@ColumnResult(name = "password", type = String.class),
+				@ColumnResult(name = "state", type = Integer.class),
+				@ColumnResult(name = "isSystem", type = Integer.class),
+				@ColumnResult(name = "salt", type = String.class),
+				@ColumnResult(name = "createTime", type = Date.class),
+				@ColumnResult(name = "updateTime", type = Date.class),
+				@ColumnResult(name = "roleName", type = String.class) })) })
 @Entity
 @Table(name = "ADMIN")
 public class Admin implements Serializable {
@@ -45,6 +63,41 @@ public class Admin implements Serializable {
 	@JsonSerialize(using = CustomDateSerializer.class)
 	@Column(name = "UPDATE_TIME")
 	private Date updateTime;
+
+	@Transient
+	private String roleName;
+	@Transient
+	private List<Long> roles = new ArrayList<>();
+
+	public Admin(Long id, String userName, String password, Integer state, Integer isSystem, String salt,
+			Date createTime, Date updateTime, String roleName) {
+		super();
+		this.id = id;
+		this.userName = userName;
+		this.password = password;
+		this.state = state;
+		this.isSystem = isSystem;
+		this.salt = salt;
+		this.createTime = createTime;
+		this.updateTime = updateTime;
+		this.roleName = roleName;
+	}
+
+	public List<Long> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Long> roles) {
+		this.roles = roles;
+	}
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
 
 	public String getCredentialsSalt() {
 		return this.userName + this.salt;
@@ -117,7 +170,7 @@ public class Admin implements Serializable {
 	public Admin() {
 		super();
 	}
-
+	
 	public Admin(Long id, String userName, String password, Integer state, String salt, Date createTime,
 			Date updateTime) {
 		super();
@@ -132,8 +185,9 @@ public class Admin implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Admin [id=" + id + ", userName=" + userName + ", password=" + password + ", state=" + state + ", salt="
-				+ salt + ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
+		return "Admin [id=" + id + ", userName=" + userName + ", password=" + password + ", state=" + state
+				+ ", isSystem=" + isSystem + ", salt=" + salt + ", createTime=" + createTime + ", updateTime="
+				+ updateTime + ", roleName=" + roleName + ", roles=" + roles + "]";
 	}
 
 }
